@@ -5,6 +5,7 @@ import com.br.nascimento.dogShwo.services.DogService;
 import java.util.List;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,8 +17,8 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 @Path("/dog")
-@Produces(value = MediaType.APPLICATION_JSON)
-@Transactional
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class DogResource {
 
   @Inject
@@ -30,34 +31,38 @@ public class DogResource {
 
   @GET
   @Path("{id:\\d+}")
+  @Transactional
   public Dog getDogById(@PathParam("id") Long id) {
     return dogService.findById(id);
   }
 
   @POST
+  @Transactional
   public Dog saveDog(@RequestBody Dog dog) {
-    dogService.persist(dog);
-    Dog savedDog = dogService.findById(dog.getId());
-    if (savedDog != null) {
-      return savedDog;
+      dogService.persist(dog);
+      Dog savedDog = dogService.findById(dog.getId());
+      if (savedDog != null) {
+          return savedDog;
+        }
+        return null;
     }
-    return null;
-  }
-
-  @PUT
-  @Path("/{id:\\d+}/update")
-  public Dog updateDog(@PathParam("id") Long id, @RequestBody Dog dog) {
-    Dog updatedDog = dogService.findById(id);
-    if (updatedDog != null) {
-      dogService.persist(updatedDog);
-      return updatedDog;
+    
+    @PUT
+    @Path("/{id:\\d+}/update")
+    @Transactional
+    public Dog updateDog(@PathParam("id") Long id, @RequestBody Dog dog) {
+        Dog updatedDog = dogService.findById(id);
+        if (updatedDog != null) {
+            dogService.persist(updatedDog);
+            return updatedDog;
+        }
+        return null;
     }
-    return null;
-  }
-
-  @DELETE
-  @Path("/{id:\\d+}/delete")
-  public void deleteDog(@PathParam("id") Long id) {
-    dogService.delete(dogService.findById(id));
+    
+    @DELETE
+    @Path("/{id:\\d+}/delete")
+    @Transactional
+    public void deleteDog(@PathParam("id") Long id) {
+        dogService.delete(dogService.findById(id));
   }
 }
